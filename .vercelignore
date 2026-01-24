@@ -1,0 +1,21 @@
+# Ignore extension files
+
+background.js
+build.js
+config.js
+content.js
+manifest.json
+popup.html
+popup.js
+styles.css
+icons/
+src/
+\*.md
+.env
+.gitignore
+
+# Keep only backend files
+
+!api/
+!vercel.json
+!package.json
