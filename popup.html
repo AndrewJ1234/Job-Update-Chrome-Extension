@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="app" class="container">
+        <!-- Main View -->
+        <div id="mainView" class="view">
+            <div class="header">
+                <div class="header-left">
+                    <svg class="icon-large" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    <h1>Job Tracker</h1>
+                </div>
+                <button id="settingsBtn" class="icon-btn">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="configWarning" class="alert alert-warning hidden">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+                <div>
+                    <p class="font-medium">Configuration required</p>
+                    <p>Please configure your Notion credentials in Settings.</p>
+                </div>
+            </div>
+
+            <div id="errorAlert" class="alert alert-error hidden">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+                <p id="errorMessage"></p>
+            </div>
+
+            <div id="successView" class="success-view hidden">
+                <svg class="icon-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="success-text">Added to Notion!</p>
+            </div>
+
+            <div id="formView">
+                <button id="autoFillBtn" class="btn-auto-fill">
+                    🪄 Auto-fill from page
+                </button>
+
+                <form id="jobForm" class="form">
+                    <div class="form-group">
+                        <label for="position">Position *</label>
+                        <input type="text" id="position" placeholder="Software Engineer" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Company *</label>
+                        <input type="text" id="company" placeholder="Company Name" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="industry">Industry</label>
+                            <input type="text" id="industry" placeholder="Tech">
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status">
+                                <option>Applied</option>
+                                <option>Interviewing</option>
+                                <option>Offer</option>
+                                <option>Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="applied">Applied Date</label>
+                            <input type="date" id="applied">
+                        </div>
+                        <div class="form-group">
+                            <label for="interviewDate">Interview Date</label>
+                            <input type="date" id="interviewDate">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="applicationLink">Application Link</label>
+                        <input type="url" id="applicationLink" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="note">Notes</label>
+                        <textarea id="note" rows="3" placeholder="Additional notes..."></textarea>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-primary">
+                        Add to Notion
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="settingsView" class="view hidden">
+            <div class="header">
+                <h2>Settings</h2>
+                <button id="closeSettingsBtn" class="icon-btn">✕</button>
+            </div>
+
+            <div class="form">
+                <div class="form-group">
+                    <label for="notionToken">Notion Integration Token</label>
+                    <input type="password" id="notionToken" placeholder="secret_xxxxxxxxxxxxx">
+                </div>
+
+                <div class="form-group">
+                    <label for="dataSourceId">Data Source ID</label>
+                    <input type="text" id="dataSourceId" placeholder="248104cd-477e-80af-bc30-000bd28de8f9">
+                </div>
+
+                <div class="alert alert-info">
+                    <p class="font-medium">Setup Instructions:</p>
+                    <ol>
+                        <li>Go to notion.so/my-integrations</li>
+                        <li>Create a new integration and copy the token</li>
+                        <li>Share your database with the integration</li>
+                        <li>Copy the data source ID from your database URL</li>
+                        <li>Ensure your database has these properties:
+                            <ul>
+                                <li>Position (Title)</li>
+                                <li>Company (Text)</li>
+                                <li>Industry (Text)</li>
+                                <li>Application Status (Select)</li>
+                                <li>Applied (Date)</li>
+                                <li>Interview Date (Date)</li>
+                                <li>Application Link (URL)</li>
+                                <li>Note (Text)</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <button id="saveSettingsBtn" class="btn-primary">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>
