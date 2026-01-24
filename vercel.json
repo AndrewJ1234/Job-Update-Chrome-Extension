@@ -1,0 +1,11 @@
+{
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "buildCommand": null,
+  "installCommand": null,
+  "ignoreCommand": "exit 0"
+}
