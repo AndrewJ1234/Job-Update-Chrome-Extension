@@ -35,11 +35,22 @@ export default async function handler(req, res) {
         .json({ error: "Position and Company are required" });
     }
 
-    console.log("Using DATABASE_ID:", process.env.DATABASE_ID);
+    console.log("Using DATA_SOURCE_ID:", process.env.DATA_SOURCE_ID);
 
-    // Step 1: Get the database info to fetch the data_source_id
-    const databaseResponse = await fetch(
-      `https://api.notion.com/v1/databases/${process.env.DATABASE_ID}`,
+    // Skip fetching database - use data_source_id directly
+    const dataSourceId = process.env.DATA_SOURCE_ID;
+
+    if (!dataSourceId) {
+      return res.status(400).json({
+        error: "DATA_SOURCE_ID environment variable is not set",
+      });
+    }
+
+    console.log("Using dataSourceId:", dataSourceId);
+
+    // Step 1: Verify the data source exists by fetching it
+    const dataSourceResponse = await fetch(
+      `https://api.notion.com/v1/data_sources/${dataSourceId}`,
       {
         method: "GET",
         headers: {
@@ -49,46 +60,31 @@ export default async function handler(req, res) {
       },
     );
 
-    const databaseData = await databaseResponse.json();
+    const databaseData = await dataSourceResponse.json();
 
     console.log(
-      "Full database response:",
+      "Full data source response:",
       JSON.stringify(databaseData, null, 2),
     );
-    console.log("Data sources array:", databaseData.data_sources);
-    console.log("First data source:", databaseData.data_sources?.[0]);
-    console.log(
-      "Data source ID extracted:",
-      databaseData.data_sources?.[0]?.id,
-    );
 
-    if (!databaseResponse.ok) {
-      console.error("Database fetch failed:", databaseData);
-      return res.status(databaseResponse.status).json({
+    if (!dataSourceResponse.ok) {
+      console.error("Data source fetch failed:", databaseData);
+      return res.status(dataSourceResponse.status).json({
         error:
-          "Failed to fetch database - check your DATABASE_ID in Vercel env vars",
+          "Failed to fetch data source - check your DATA_SOURCE_ID in Vercel env vars",
         details: databaseData,
-        hint: "Your DATABASE_ID env var should be the 32-character string from your Notion URL (notion.so/.../DATABASE_ID?v=...)",
+        hint: "Use the DATA_SOURCE_ID you copied from Notion's 'Manage data sources'",
       });
     }
 
-    // Get the actual data source ID from the database response
-    const dataSourceId = databaseData.data_sources?.[0]?.id;
+    // Get the actual data source ID from the response (should match what we sent)
+    const finalDataSourceId = databaseData.id;
 
-    if (!dataSourceId) {
-      return res.status(400).json({
-        error: "No data source found in database",
-        databaseData: databaseData,
-      });
-    }
-
-    console.log("Successfully extracted dataSourceId:", dataSourceId);
-
-    // Step 2: Create the page with the correct data_source_id
+    // Step 2: Create the page with the data_source_id
     const notionPayload = {
       parent: {
         type: "data_source_id",
-        data_source_id: dataSourceId,
+        data_source_id: finalDataSourceId,
       },
       properties: {
         Position: {
