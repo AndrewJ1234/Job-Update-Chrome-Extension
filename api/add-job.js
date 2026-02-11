@@ -35,22 +35,11 @@ export default async function handler(req, res) {
         .json({ error: "Position and Company are required" });
     }
 
-    console.log("Using DATA_SOURCE_ID:", process.env.DATA_SOURCE_ID);
+    console.log("Using DATABASE_ID:", process.env.DATABASE_ID);
 
-    // Skip fetching database - use data_source_id directly
-    const dataSourceId = process.env.DATA_SOURCE_ID;
-
-    if (!dataSourceId) {
-      return res.status(400).json({
-        error: "DATA_SOURCE_ID environment variable is not set",
-      });
-    }
-
-    console.log("Using dataSourceId:", dataSourceId);
-
-    // Step 1: Verify the data source exists by fetching it
-    const dataSourceResponse = await fetch(
-      `https://api.notion.com/v1/data_sources/${dataSourceId}`,
+    // Step 1: Get the database to fetch the data_source_id
+    const databaseResponse = await fetch(
+      `https://api.notion.com/v1/databases/${process.env.DATABASE_ID}`,
       {
         method: "GET",
         headers: {
@@ -60,31 +49,39 @@ export default async function handler(req, res) {
       },
     );
 
-    const databaseData = await dataSourceResponse.json();
+    const databaseData = await databaseResponse.json();
 
     console.log(
-      "Full data source response:",
+      "Full database response:",
       JSON.stringify(databaseData, null, 2),
     );
 
-    if (!dataSourceResponse.ok) {
-      console.error("Data source fetch failed:", databaseData);
-      return res.status(dataSourceResponse.status).json({
-        error:
-          "Failed to fetch data source - check your DATA_SOURCE_ID in Vercel env vars",
+    if (!databaseResponse.ok) {
+      console.error("Database fetch failed:", databaseData);
+      return res.status(databaseResponse.status).json({
+        error: "Failed to fetch database",
         details: databaseData,
-        hint: "Use the DATA_SOURCE_ID you copied from Notion's 'Manage data sources'",
+        hint: "Make sure DATABASE_ID is correct (32-char string from Notion URL)",
       });
     }
 
-    // Get the actual data source ID from the response (should match what we sent)
-    const finalDataSourceId = databaseData.id;
+    // Extract the data_source_id from the database response
+    const dataSourceId = databaseData.data_sources?.[0]?.id;
 
-    // Step 2: Create the page with the data_source_id
+    if (!dataSourceId) {
+      return res.status(400).json({
+        error: "No data source found in database",
+        databaseData: databaseData,
+      });
+    }
+
+    console.log("Successfully extracted dataSourceId:", dataSourceId);
+
+    // Step 2: Create the page using data_source_id as parent
     const notionPayload = {
       parent: {
         type: "data_source_id",
-        data_source_id: finalDataSourceId,
+        data_source_id: dataSourceId,
       },
       properties: {
         Position: {
@@ -132,6 +129,11 @@ export default async function handler(req, res) {
       };
     }
 
+    console.log(
+      "Creating page with payload:",
+      JSON.stringify(notionPayload, null, 2),
+    );
+
     // Call Notion API to create the page
     const notionResponse = await fetch("https://api.notion.com/v1/pages", {
       method: "POST",
@@ -144,6 +146,11 @@ export default async function handler(req, res) {
     });
 
     const notionData = await notionResponse.json();
+
+    console.log(
+      "Notion page creation response:",
+      JSON.stringify(notionData, null, 2),
+    );
 
     if (!notionResponse.ok) {
       console.error("Notion API Error:", notionData);
